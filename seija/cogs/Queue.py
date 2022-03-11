@@ -545,6 +545,15 @@ class Queue(commands.Cog):
         embed = discord.Embed(color=0xff6781)
         await send_large_message.send_large_embed(ctx.channel, embed, buffer)
         
+    @commands.Cog.listener()
+    async def on_message_send(self, ctx):
+        channel = ctx.message.channel
+        if self.channel_is_a_queue(ctx) and self.get_queue_creator(ctx):
+            queue_owner = self.get_queue_creator(ctx)
+            # async with self.bot.db.execute("SELECT category_id FROM categories WHERE setting = ? AND guild_id = ?",
+            #                           ["queue_archive", int(ctx.guild.id)]) as cursor:
+            
+        
     @commands.command(name="enable_notifications", brief="Toggles sending a DM for every message in your queue")
     @commands.guild_only()
     @commands.check(permissions.is_not_ignored)
