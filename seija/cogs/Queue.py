@@ -544,6 +544,35 @@ class Queue(commands.Cog):
 
         embed = discord.Embed(color=0xff6781)
         await send_large_message.send_large_embed(ctx.channel, embed, buffer)
+        
+    @commands.command(name="enable_notifications", brief="Toggles sending a DM for every message in your queue")
+    @commands.guild_only()
+    @commands.check(permissions.is_not_ignored)
+    async def toggle_notifications(self, ctx):
+        """
+        This command will toggle sending the queue owner a DM whenever a new message is sent in their queue. 
+        If they have notifications enabled, this command will disable them and vice versa.
+        """
+        if not await self.channel_is_a_queue(ctx):
+            await ctx.send(f"{ctx.author.mention} this channel is not a queue")
+            return
+
+        if not await self.can_manage_queue(ctx):
+            await ctx.send(f"{ctx.author.mention} you are not allowed to manage this queue")
+            return
+
+        queue_owner = await self.get_queue_creator(ctx)
+        if not queue_owner:
+            queue_owner = ctx.author
+            await ctx.send("warning, unable to find the queue owner in this server. "
+                           "so, i will treat the person typing the command "
+                           "as the queue owner during the execution of this command.")
+        # async with self.bot.db.execute("SELECT category_id FROM categories WHERE setting = ? AND guild_id = ?",
+        #                                ["queue_archive", int(ctx.guild.id)]) as cursor:
+            
+        
+        await ctx.send("notifications on")
+        await queue_owner.send("test notification. if you can see this, you're good to go!")
 
     async def get_category_id(self, guild, setting):
         async with self.bot.db.execute("SELECT category_id FROM categories WHERE setting = ? AND guild_id = ?",
@@ -622,7 +651,7 @@ class Queue(commands.Cog):
         embed.set_author(name=ctx.author.display_name,
                          icon_url=ctx.author.avatar_url_as(static_format="jpg", size=128))
         await ctx.message.delete()
-        return embed
+        return embed     
 
 
 def setup(bot):
